@@ -1,39 +1,38 @@
 {
     "name": "axios-bastion",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Resilient Axios interceptor with retries, exponential backoff, and circuit breaker",
     "type": "module",
     "main": "index.js",
     "exports": {
-      ".": "./index.js"
+        ".": "./index.js"
     },
     "keywords": [
-      "axios",
-      "retry",
-      "backoff",
-      "circuit-breaker",
-      "resilience",
-      "http",
-      "api"
+        "axios",
+        "retry",
+        "backoff",
+        "circuit-breaker",
+        "resilience",
+        "http",
+        "api"
     ],
     "author": "John Roshan <johnroshan2255@gmail.com>",
     "license": "MIT",
     "repository": {
-      "type": "git",
-      "url": "https://github.com/johnroshan2255/axios-bastion.git"
+        "type": "git",
+        "url": "https://github.com/johnroshan2255/axios-bastion.git"
     },
     "homepage": "https://github.com/johnroshan2255/axios-bastion#readme",
     "engines": {
-      "node": ">=18.0.0"
+        "node": ">=18.0.0"
     },
     "files": [
-      "index.js",
-      "bastion.js",
-      "README.md",
-      "LICENSE"
+        "index.js",
+        "bastion.js",
+        "README.md",
+        "LICENSE"
     ],
     "peerDependencies": {
-      "axios": "^1.6.0"
+        "axios": "^1.6.0"
     }
-  }
-  
+}
