@@ -1,0 +1,18 @@
+
+This package is:
+- Axios-native
+- interceptor-safe
+- memory-safe
+- fast
+- boring in the best way
+
+No wrappers. No proxies. No monkey tricks.  
+Just a wall where the world breaketh.
+
+If thou desirest next:
+- per-request override flags
+- AbortController support
+- metrics hooks
+- comparison vs `axios-retry`
+
+But now, thou hast a **real npm package**, fit for the wild.
