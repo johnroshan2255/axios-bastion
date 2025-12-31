@@ -53,60 +53,78 @@ class CircuitBreaker {
 * @param {BastionOptions} options
 */
 export function bastion(axiosInstance, options = {}) {
- const {
-   retries = 3,
-   baseDelayMs = 200,
-   maxDelayMs = 5000,
-   jitter = true,
-   retryStatusCodes = [500, 502, 503, 504],
-   circuitBreaker
- } = options
+  const {
+    retries = 3,
+    baseDelayMs = 200,
+    maxDelayMs = 5000,
+    jitter = true,
+    retryStatusCodes = [500, 502, 503, 504],
+    circuitBreaker,
+    logger
+  } = options
 
- const breaker = circuitBreaker
-   ? new CircuitBreaker(
-       circuitBreaker.failureThreshold ?? 5,
-       circuitBreaker.resetTimeoutMs ?? 10000
-     )
-   : null
+  const log =
+    typeof logger === 'function'
+      ? logger
+      : logger
+      ? console.log
+      : null
 
- axiosInstance.interceptors.response.use(
-   response => {
-     breaker?.success()
-     return response
-   },
-   async error => {
-     const config = error.config
-     if (!config) throw error
+  const breaker = circuitBreaker
+    ? new CircuitBreaker(
+        circuitBreaker.failureThreshold ?? 5,
+        circuitBreaker.resetTimeoutMs ?? 10000
+      )
+    : null
 
-     config.__bastionRetry ??= 0
+  axiosInstance.interceptors.response.use(
+    response => {
+      breaker?.success()
+      return response
+    },
+    async error => {
+      const config = error.config
+      if (!config) throw error
 
-     if (breaker && !breaker.allow()) {
-       throw new Error('axios-bastion: circuit breaker open')
-     }
+      config.__bastionRetry ??= 0
 
-     const status = error.response?.status
-     const retryable =
-       !status || retryStatusCodes.includes(status)
+      if (breaker && !breaker.allow()) {
+        log?.(
+          `[bastion] circuit open → ${config.method?.toUpperCase()} ${config.url}`
+        )
+        throw new Error('axios-bastion: circuit breaker open')
+      }
 
-     if (!retryable || config.__bastionRetry >= retries) {
-       breaker?.fail()
-       throw error
-     }
+      const status = error.response?.status
+      const retryable =
+        !status || retryStatusCodes.includes(status)
 
-     config.__bastionRetry++
+      if (!retryable || config.__bastionRetry >= retries) {
+        breaker?.fail()
+        log?.(
+          `[bastion] failed after ${config.__bastionRetry} retries → ${config.method?.toUpperCase()} ${config.url}`
+        )
+        throw error
+      }
 
-     breaker?.fail()
+      config.__bastionRetry++
+      breaker?.fail()
 
-     const delay = computeDelay(
-       config.__bastionRetry,
-       baseDelayMs,
-       maxDelayMs,
-       jitter
-     )
+      const delay = computeDelay(
+        config.__bastionRetry,
+        baseDelayMs,
+        maxDelayMs,
+        jitter
+      )
 
-     await sleep(delay)
+      log?.(
+        `[bastion] retry ${config.__bastionRetry}/${retries} in ${delay}ms → ${config.method?.toUpperCase()} ${config.url}`
+      )
 
-     return axiosInstance.request(config)
-   }
- )
+      await sleep(delay)
+
+      return axiosInstance.request(config)
+    }
+  )
 }
+
